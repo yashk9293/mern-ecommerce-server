@@ -125,7 +125,7 @@ export const updateProduct = TryCatch(async (req, res, next) => {
 
   if (!product) return next(new ErrorHandler("Product Not Found", 404));
 
-  const myCloud = await cloudinary.uploader.upload(photo.path, {
+  const myCloud = await cloudinary.uploader.upload(photo!.path, {
     folder: "products",
   });
 
