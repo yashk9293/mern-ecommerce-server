@@ -6,6 +6,7 @@ import { config } from "dotenv";
 import morgan from "morgan";
 import Stripe from "stripe";
 import cors from "cors";
+import {v2 as cloudinary} from "cloudinary";
 
 // Importing Routes
 import userRoute from "./routes/user.js";
@@ -23,6 +24,12 @@ const mongoURI = process.env.MONGO_URI || "";
 const stripeKey = process.env.STRIPE_KEY || "";
 
 connectDB(mongoURI);
+
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 export const stripe = new Stripe(stripeKey);
 export const myCache = new NodeCache();

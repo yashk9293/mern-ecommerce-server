@@ -10,7 +10,7 @@ import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
 import { myCache } from "../app.js";
 import { invalidateCache } from "../utils/features.js";
-// import { faker } from "@faker-js/faker";
+import {v2 as cloudinary} from "cloudinary"
 
 // Revalidate on New,Update,Delete Product & on New Order
 export const getlatestProducts = TryCatch(async (req, res, next) => {
@@ -82,11 +82,15 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
 });
 
 export const newProduct = TryCatch(
-  async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
+  async (req, res, next) => {
     const { name, price, stock, category } = req.body;
     const photo = req.file;
 
     if (!photo) return next(new ErrorHandler("Please add Photo", 400));
+
+    const myCloud = await cloudinary.uploader.upload(photo.path, {
+      folder: "products",
+    });
 
     if (!name || !price || !stock || !category) {
       rm(photo.path, () => {
@@ -101,7 +105,7 @@ export const newProduct = TryCatch(
       price,
       stock,
       category: category.toLowerCase(),
-      photo: photo.path,
+      photo: myCloud.secure_url,
     });
 
     invalidateCache({ product: true, admin: true });
@@ -121,11 +125,15 @@ export const updateProduct = TryCatch(async (req, res, next) => {
 
   if (!product) return next(new ErrorHandler("Product Not Found", 404));
 
+  const myCloud = await cloudinary.uploader.upload(photo.path, {
+    folder: "products",
+  });
+
   if (photo) {
     rm(product.photo!, () => {
       console.log("Old Photo Deleted");
     });
-    product.photo = photo.path;
+    product.photo = myCloud.secure_url;
   }
 
   if (name) product.name = name;
